@@ -5,7 +5,7 @@ const TaskSchema = mongoose.Schema({
     description: {type:String, required: true},
     assignee: {type:String},
     status: {type: String},
-    referenceTo: { type: mongoose.Schema.Types.ObjectId, ref: "Users"}
+    referenceTo: { type: mongoose.Schema.Types.ObjectId, ref: "User"}
 },
 {
     timestamps: true

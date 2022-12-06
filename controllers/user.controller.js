@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const { AppError, sendResponse } = require('../helpers/utils')
+const Task = require('../models/Task')
 const User = require('../models/User')
 
 const userController = {}
@@ -59,5 +60,19 @@ userController.getUser = async (req,res,next) => {
     } catch (error) {
         res.status(400).send(error)
     }
+}
+
+userController.getUserTask = async (req,res,next) => {
+
+    let {task} = req.params
+
+    try {
+        const findTask = await Task.find({assignee: task})
+
+        sendResponse(res,200,true,{userTask: findTask},null,{message:"get user's task successful"})
+    } catch (error) {
+        next(error)
+    }
+
 }
 module.exports = userController

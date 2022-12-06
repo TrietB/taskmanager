@@ -1,6 +1,7 @@
 const { sendResponse, AppError } = require("../helpers/utils");
 const Task = require("../models/Task");
-const Users = require("../models/User");
+const User = require("../models/User");
+
 
 const taskController = {};
 
@@ -16,6 +17,18 @@ taskController.getAllTasks = async (req, res, next) => {
   }
 };
 
+taskController.getTaskByName = async (req,res,next) => {
+  let {name} = req.params
+  console.log(name)
+  try{
+    const task = await Task.findOne({name:name})
+
+    sendResponse(res,200,true,{task: task}, null, {message:"get single task success"})
+  } catch(err){
+    next(err)
+  }
+}
+
 taskController.createTask = async (req, res, next) => {
   let { name, description, assignee, status } = req.body;
   try {
@@ -27,12 +40,10 @@ taskController.createTask = async (req, res, next) => {
       status: status,
     });
 
-        Users.findOne({name: assignee}, (user) =>{
-            if(user) {
-                user.tasks.push(newTask)
-                user.save()
-            }
-        })
+    const user = await User.findOne({name: assignee})
+
+    user.tasks.push(newTask)
+    user.save()
    
 
     const created = await Task.create(newTask)
@@ -42,5 +53,8 @@ taskController.createTask = async (req, res, next) => {
   }
 };
 
+taskController.getUserTask = async (req,res,next) => {
+
+}
 
 module.exports = taskController
