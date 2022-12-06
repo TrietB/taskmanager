@@ -47,4 +47,17 @@ userController.getAllUsers = async (req,res,next) => {
     }
 }
 
+
+userController.getUser = async (req,res,next) => {
+    
+    let {name} = req.params
+    console.log(name)
+    try {
+        const user = await User.findOne({name: name}).populate('tasks')
+
+        sendResponse(res,200,true,{user: user}, null, {message: 'retrieved user'})
+    } catch (error) {
+        res.status(400).send(error)
+    }
+}
 module.exports = userController

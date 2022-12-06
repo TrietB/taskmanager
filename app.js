@@ -16,6 +16,7 @@ mongoose
 
 var indexRouter = require("./routes/index");
 const userRouter = require('./routes/user.api')
+const taskRouter = require('./routes/task.api')
 
 var app = express();
 
@@ -30,6 +31,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 
 app.use('/user', userRouter)
+app.use('/task', taskRouter)
 
 app.use((req,res,next)=>{
     const err = new AppError(404,"Not Found", "Bad Request")
