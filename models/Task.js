@@ -3,9 +3,10 @@ const mongoose = require('mongoose')
 const TaskSchema = mongoose.Schema({
     name: {type:String, required: true},
     description: {type:String, required: true},
-    assignee: {type:String},
-    status: {type: String},
-    referenceTo: { type: mongoose.Schema.Types.ObjectId, ref: "User"}
+    assignee: { type: mongoose.Schema.Types.ObjectId, ref: "User"},
+    status: {type: String, enum: ["pending","working",'review','done','archived']},
+    assignedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User"},
+
 },
 {
     timestamps: true

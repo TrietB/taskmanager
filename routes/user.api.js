@@ -9,11 +9,11 @@ const router = express.Router()
 router.post('/', createUser)
 
 //Edit user
-// router.put('/:id', editUser)
+router.put('/:id', editUser)
 //Get all user
 router.get('/', getAllUsers)
 
 // router.get('/:name', getUser)
 
-router.get('/:task', getUserTask)
+
 module.exports = router
