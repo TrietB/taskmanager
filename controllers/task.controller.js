@@ -64,27 +64,76 @@ taskController.createTask = async (req, res, next) => {
 //done => check request for "archived"
 taskController.updateTask = async (req,res,next) => {
 //check role before update task
-  let {id} = req.params
-  let {role, status, ...updateInfo} = req.body
+  let {taskId} = req.params
+  let {role, status} = req.body
+  let updateInfo = req.body
   let options = {new:true}
   const workState = ["pending","working",'review','done','archived']
-try {
-  if(role == "employee") throw new AppError(400,"not authorized", 'update task failed')
-  switch (status) {
+
+  
+  try {
+  const updates = Object.keys(req.body)
+  const allowedUpdates = ['name',
+    'description',
+    'assignee',
+    'status',
+    'assignedBy','role']
+  const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
+
+  if (!isValidOperation) {
+      return res.status(400).send({ error: 'Invalid updates!' })
+  }
+
+  //check role to authorize update task
+  if(role !== 'manager') throw new AppError(403, "not allowed", "update task failed")
+  // check status from task and match with the req from body
+  const task = await Task.findById(taskId)
+
+  const updatedTask = await Task.findByIdAndUpdate(taskId,updateInfo, options)
+  switch (task.status) {
+    case status:
+      // sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
+      break
     case 'pending':
-      
-      break;
+      sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
+        break;
     case 'working':
-      break
+      sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
+        break
     case 'review':
-      break
+      sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
+        break
     case 'done':
-      break
+      if(status !== 'archived') throw new AppError(404, "done task cannot be revert", 'update task failed')
+
+        break
     case 'archived':
-      break
+      if(status !== 'archived') {
+        throw new AppError(404, 'cannot change archived task', 'task update failed')
+      }else {
+      console.log('archived')
+      }
+
+        break
+    
     default:
       break;
   }
+
+  
+  
+  
+  
+  //employee can change from pending to review, cannot change back from review
+  //manager change review - done - archived
+  //task done can only change to archived
+  //task archived is permanent
+
+  //update task
+  // const updatedTask = await Task.findByIdAndUpdate(id,updateInfo, options)
+  // sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
+
+  
 } catch (error) {
   next(error)
 }

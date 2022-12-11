@@ -1,6 +1,6 @@
 const express = require('express')
 
-const { getAllTasks, createTask, getTaskByName, getTaskOfUser } = require('../controllers/task.controller')
+const { getAllTasks, createTask, getTaskByName, getTaskOfUser, updateTask } = require('../controllers/task.controller')
 
 const router = express.Router()
 
@@ -12,10 +12,13 @@ router.get('/', getAllTasks)
 router.post('/', createTask)
 
 //get a single task by name
-router.get('/:task', getTaskByName)
+router.get('/:taskId', getTaskByName)
 
 //get task of user
 router.get('/:name', getTaskOfUser)
+
+//edit a task by id
+router.put('/:taskId', updateTask)
 
 
 module.exports = router
