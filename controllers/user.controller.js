@@ -100,10 +100,10 @@ userController.getAllUsers = async (req,res,next) => {
 //check exist user
 userController.getUser = async (req,res,next) => {
     
-    let {name} = req.params
-    console.log(name)
+    let {id} = req.params
+    // console.log(name)
     try {
-        const user = await User.findOne({name: name})
+        const user = await User.findById(id)
 
         sendResponse(res,200,true,{user: user}, null, {message: 'retrieved user'})
     } catch (error) {

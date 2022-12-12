@@ -5,19 +5,44 @@ const { getAllTasks, createTask, getTaskByName, getTaskOfUser, updateTask } = re
 const router = express.Router()
 
 
-//get all tasks
+/**
+ * @route GET api/task
+ * @description get All tasks
+ * @access private, manager
+ * @allowQueries: task id, name, createdAt, updateAt 
+ */
 router.get('/', getAllTasks)
 
-//create task
+/**
+ * @route POST api/task
+ * @description get All tasks
+ * @access private, manager
+ * @requiredBody: role, name, description, status, assignedBy
+ */
 router.post('/', createTask)
 
-//get a single task by name
+/**
+ * @route GET api/task
+ * @description get single task by Id
+ * @access private, manager
+ * @requiredBody: role, name, description, status, assignedBy
+ */
 router.get('/:taskId', getTaskByName)
 
-//get task of user
+/**
+ * @route GET api/task
+ * @description get task of a user by name
+ * @access private, manager
+ * @requiredParams: user "name"
+ */
 router.get('/:name', getTaskOfUser)
 
-//edit a task by id
+/**
+ * @route GET api/task
+ * @description get single task by Id
+ * @access private, manager
+ * @requiredParams: taskId
+ */
 router.put('/:taskId', updateTask)
 
 

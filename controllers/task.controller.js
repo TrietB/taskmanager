@@ -6,11 +6,35 @@ const User = require("../models/User");
 const taskController = {};
 //filter date, status, search for descrip and task name
 taskController.getAllTasks = async (req, res, next) => {
+  const allowedFilter = ['status','createdAt', 'updatedAt']
+
 
   try {
+    let {...filterQuery} = req.query
+
+    const filterKeys = Object.keys(filterQuery)
+    filterKeys.forEach((key) => {
+      if (!allowedFilter.includes(key)) {
+        const exception = new AppError(401, `Query ${key} is not allowed`, 'Get tasks unsuccess');
+        throw exception;
+      }
+      if (!filterQuery[key]) delete filterQuery[key];
+    });
+
     const listOfTasks = await Task.find({});
 
-    sendResponse(res, 200, true, { tasks: listOfTasks }, null, {
+    let result = []
+    if(filterKeys.length){
+      filterKeys.map((condition)=> {
+        if(condition == 'status'){
+          filterByStatus = listOfTasks.filter((task)=> task.status.includes(filterQuery[condition]))
+          result = filterByStatus
+        }
+      })
+    }
+    // if(status) listOfTasks.filter((task)=> task.status.includes(status))
+
+    sendResponse(res, 200, true, { tasks: result  }, null, {
       message: "Get list of tasks success",
     });
   } catch (error) {
@@ -88,12 +112,12 @@ taskController.updateTask = async (req,res,next) => {
   if(role !== 'manager') throw new AppError(403, "not allowed", "update task failed")
   // check status from task and match with the req from body
   const task = await Task.findById(taskId)
-
   const updatedTask = await Task.findByIdAndUpdate(taskId,updateInfo, options)
+
   switch (task.status) {
-    case status:
-      // sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
-      break
+    // case status:
+    //   // sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
+    //     break
     case 'pending':
       sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
         break;
@@ -104,20 +128,17 @@ taskController.updateTask = async (req,res,next) => {
       sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
         break
     case 'done':
-      if(status !== 'archived') throw new AppError(404, "done task cannot be revert", 'update task failed')
+      if(status !== 'archived') throw new AppError(404, "done task cannot be change", 'update task failed')
+      sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
 
         break
     case 'archived':
-      if(status !== 'archived') {
-        throw new AppError(404, 'cannot change archived task', 'task update failed')
-      }else {
-      console.log('archived')
-      }
+      if(status !== 'archived') throw new AppError(404, 'cannot change archived task', 'task update failed')
 
+      sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
         break
-    
     default:
-      break;
+      return task
   }
 
   

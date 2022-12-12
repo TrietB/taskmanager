@@ -4,16 +4,36 @@ const { createUser, editUser, getAllUsers, getUser, getUserTask } = require('../
 const router = express.Router()
 
 
-//Create new user
-
+/**
+ * @route POST api/users
+ * @description Create a new user
+ * @access private, manager
+ * @requiredBody: name
+ */
 router.post('/', createUser)
 
-//Edit user
+/**
+ * @route PUT api/users
+ * @description Edit a user
+ * @access private, manager
+ * @requiredParams: id
+ */
 router.put('/:id', editUser)
-//Get all user
+
+/**
+ * @route GET api/users
+ * @description Get a list of users
+ * @access private
+ * @allowedQueries: name
+ */
 router.get('/', getAllUsers)
 
-// router.get('/:name', getUser)
+/**
+ * @route GET api/users/:id
+ * @description Get user by id
+ * @access public
+ */
+router.get('/:id', getUser)
 
 
 module.exports = router
