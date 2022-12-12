@@ -15,7 +15,7 @@ router.get('/', getAllTasks)
 
 /**
  * @route POST api/task
- * @description get All tasks
+ * @description create new task
  * @access private, manager
  * @requiredBody: role, name, description, status, assignedBy
  */

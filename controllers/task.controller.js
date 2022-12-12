@@ -29,6 +29,8 @@ taskController.getAllTasks = async (req, res, next) => {
         if(condition == 'status'){
           filterByStatus = listOfTasks.filter((task)=> task.status.includes(filterQuery[condition]))
           result = filterByStatus
+        } else if (condition == 'createdAt'){
+          filterByCreatedAt = listOfTasks.filter((task)=> task.status.includes(filterQuery[condition]))
         }
       })
     }
