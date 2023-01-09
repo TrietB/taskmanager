@@ -1,0 +1,129 @@
+[{
+  "_id": {
+    "$oid": "63bb17f871cfa75cb2c3ded7"
+  },
+  "name": "taskmanager",
+  "description": "control work flow",
+  "status": "pending",
+  "assignedBy": {
+    "$oid": "63bb12cda7cd5e0bc1908a05"
+  },
+  "deleted": false,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1673205752645"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1673208031148"
+    }
+  },
+  "__v": 0,
+  "assignee": {
+    "$oid": "63bb12dca7cd5e0bc1908a08"
+  }
+},{
+  "_id": {
+    "$oid": "63bb183771cfa75cb2c3deda"
+  },
+  "name": "coderscar-be",
+  "description": "database about cars with CRUD request",
+  "status": "working",
+  "assignedBy": {
+    "$oid": "63bb12cda7cd5e0bc1908a05"
+  },
+  "deleted": false,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1673205815071"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1673214199024"
+    }
+  },
+  "__v": 3,
+  "assignee": [
+    {
+      "$oid": "63bb12e4a7cd5e0bc1908a0b"
+    },
+    {
+      "$oid": "63bb12dca7cd5e0bc1908a08"
+    }
+  ]
+},{
+  "_id": {
+    "$oid": "63bb186671cfa75cb2c3dedd"
+  },
+  "name": "typing-test",
+  "description": "basic typing test(speed,accuracy,...)",
+  "status": "working",
+  "assignedBy": {
+    "$oid": "63bb12cda7cd5e0bc1908a05"
+  },
+  "deleted": false,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1673205862845"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1673205862845"
+    }
+  },
+  "__v": 0,
+  "assignee": {
+    "$oid": "63bb12e4a7cd5e0bc1908a0b"
+  }
+},{
+  "_id": {
+    "$oid": "63bb18a871cfa75cb2c3dee0"
+  },
+  "name": "fullstack E-commerce",
+  "description": "electronics trading website",
+  "status": "review",
+  "assignedBy": {
+    "$oid": "63bb12cda7cd5e0bc1908a05"
+  },
+  "deleted": false,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1673205928219"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1673205928219"
+    }
+  },
+  "__v": 0,
+  "assignee": {
+    "$oid": "63bb12e4a7cd5e0bc1908a0b"
+  }
+},{
+  "_id": {
+    "$oid": "63bbcafce43a60bfb5f5d354"
+  },
+  "name": "fullstack",
+  "description": "fullstack website",
+  "assignee": [],
+  "status": "pending",
+  "assignedBy": {
+    "$oid": "63bb12cda7cd5e0bc1908a05"
+  },
+  "deleted": false,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1673251580469"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1673251580469"
+    }
+  },
+  "__v": 0
+}]

@@ -14,9 +14,9 @@ router.post('/', createUser)
 
 /**
  * @route PUT api/users
- * @description Edit a user
+ * @description Edit a user - assign task
  * @access private, manager
- * @requiredParams: id
+ * @requiredParams: user Id
  */
 router.put('/:id', editUser)
 

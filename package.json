@@ -12,7 +12,10 @@
     "debug": "~2.6.9",
     "dotenv": "^16.0.3",
     "express": "~4.16.1",
+    "moment": "^2.29.4",
+    "mongodb": "^4.12.1",
     "mongoose": "^6.7.5",
+    "mongoose-delete": "^0.5.4",
     "morgan": "~1.9.1",
     "nodemon": "^2.0.20"
   }

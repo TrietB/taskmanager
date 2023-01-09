@@ -1,180 +1,332 @@
 const { sendResponse, AppError } = require("../helpers/utils");
 const Task = require("../models/Task");
 const User = require("../models/User");
-
+const moment = require("moment");
+const ObjectId = require("mongodb").ObjectId;
 
 const taskController = {};
 //filter date, status, search for descrip and task name
 taskController.getAllTasks = async (req, res, next) => {
-  const allowedFilter = ['status','createdAt', 'updatedAt']
-
+  const allowedFilter = ["status", "createdAt", "updatedAt","assignee"];
 
   try {
-    let {...filterQuery} = req.query
+    let { ...filterQuery } = req.query;
 
-    const filterKeys = Object.keys(filterQuery)
+    const filterKeys = Object.keys(filterQuery);
     filterKeys.forEach((key) => {
       if (!allowedFilter.includes(key)) {
-        const exception = new AppError(401, `Query ${key} is not allowed`, 'Get tasks unsuccess');
+        const exception = new AppError(
+          401,
+          `Query ${key} is not allowed`,
+          "Get tasks unsuccess"
+        );
         throw exception;
       }
       if (!filterQuery[key]) delete filterQuery[key];
     });
 
-    const listOfTasks = await Task.find({});
+    const listOfTasks = await Task.find({ deleted: false });
 
-    let result = []
-    if(filterKeys.length){
-      filterKeys.map((condition)=> {
-        if(condition == 'status'){
-          filterByStatus = listOfTasks.filter((task)=> task.status.includes(filterQuery[condition]))
-          result = filterByStatus
-        } else if (condition == 'createdAt'){
-          filterByCreatedAt = listOfTasks.filter((task)=> task.status.includes(filterQuery[condition]))
+    if (filterKeys.length) {
+      filterKeys.map(async (condition) => {
+        switch (condition) {
+          case "status":
+            const filterByStatus = listOfTasks.filter((task) =>
+              task.status.includes(filterQuery[condition])
+            );
+            sendResponse(res, 200, true, { tasks: filterByStatus }, null, {
+              message: `get list of ${filterQuery[condition]} success`,
+            });
+            break;
+          case "createdAt":
+            let createDate = new Date(filterQuery[condition]);
+            let endDate = moment(createDate).add(1, "days");
+            // let endDate = today.setDate(today.getDate() + 1)
+            let filterByCreatedAt = await Task.find({
+              createdAt: { $gte: createDate, $lt: endDate },
+            });
+            sendResponse(
+              res,
+              200,
+              true,
+              {
+                tasks: filterByCreatedAt.length
+                  ? filterByCreatedAt
+                  : "not found",
+              },
+              null,
+              {
+                message: filterByCreatedAt.length
+                  ? "get tasks by filter success"
+                  : "task not found",
+              }
+            );
+            break;
+          // console.log(today, endDate, filterByCreatedAt)
+          case "updatedAt":
+            let updatedDate = new Date(filterQuery[condition]);
+            let end = moment(updatedDate).add(1, "days");
+            // let endDate = today.setDate(today.getDate() + 1)
+            let filterByUpdatedAt = await Task.find({
+              updatedAt: { $gte: updatedDate, $lt: end },
+            });
+            sendResponse(
+              res,
+              200,
+              true,
+              {
+                tasks: filterByUpdatedAt.length
+                  ? filterByUpdatedAt
+                  : "not found",
+              },
+              null,
+              {
+                message: filterByUpdatedAt.length
+                  ? "get tasks by filter success"
+                  : "task not found",
+              }
+            );
+
+            break;
+          case 'assignee':
+            const assignee = filterQuery[condition].toLowerCase()
+            console.log(assignee)
+            const user = User.find({name: assignee.toString()})
+            const filterByAssignee = listOfTasks.filter((task)=> task.assignee.includes(assignee))
+            if(!filterByAssignee) throw new AppError(404, 'Assignee not found', 'get task by username faild')
+            sendResponse(res,200,true,{tasks: filterByAssignee}, null,{message:'get all tasks success'})
+          break
+          default:
+            break;
         }
-      })
+      });
+    } else {
+      sendResponse(res, 200, true, { tasks: listOfTasks }, null, {
+        message: "Get list of tasks success",
+      });
     }
-    // if(status) listOfTasks.filter((task)=> task.status.includes(status))
-
-    sendResponse(res, 200, true, { tasks: result  }, null, {
-      message: "Get list of tasks success",
-    });
   } catch (error) {
     next(error);
   }
 };
 
-taskController.getTaskByName = async (req,res,next) => {
-  let {name} = req.params
-  console.log(name)
-  try{
-    const task = await Task.findOne({name:name})
+taskController.getTaskById = async (req, res, next) => {
+  let { taskId } = req.params;
+  console.log(taskId);
+  try {
+    if (!taskId)
+      throw new AppError(402, "Required task name", "get single task failed");
+    if (!ObjectId.isValid(taskId))
+      throw new AppError(402, "Not mongo ObjectId", "get single task failed");
+    const tasks = await Task.find({ deleted: false });
 
-    sendResponse(res,200,true,{task: task}, null, {message:"get single task success"})
-  } catch(err){
-    next(err)
+    // const task = await Task.findById(taskId);
+    const task = tasks.find((task) => task._id == taskId);
+    if (!task)
+      throw new AppError(
+        402,
+        `No task with id ${taskId}`,
+        "get single task failed"
+      );
+    sendResponse(res, 200, true, { task: task }, null, {
+      message: "get single task success",
+    });
+  } catch (err) {
+    next(err);
   }
-}
+};
 
 //check for exist user, check role
 taskController.createTask = async (req, res, next) => {
   let { name, description, assignee, status, assignedBy } = req.body;
-  console.log(assignedBy)
+  console.log(assignedBy);
   try {
-    if(!name|| !description || !status || !assignedBy) throw new AppError(401,"Missing info",'failed to create')
-    let assignBy = await User.findOne({name:assignedBy})
-    console.log(assignBy)
-    if(assignBy.role == 'employee') throw new AppError(404, "Not authorize", "failed to create task")
+    if (!name || !description || !status || !assignedBy)
+      throw new AppError(
+        401,
+        "Required name, description, status, assignedBy",
+        "failed to create"
+      );
+    let assignBy = await User.findById(assignedBy);
+    console.log(assignBy);
+    if (!assignBy)
+      throw new AppError(404, "User not exist", "failed to create task");
+    if (assignBy.role == "employee")
+      throw new AppError(404, "Not authorize", "failed to create task");
     const newTask = await new Task({
       name: name,
       description: description,
       assignee: assignee,
       status: status,
-      assignedBy: assignBy._id
+      assignedBy: assignBy._id,
     });
-    
-    if(assignee) {
-      const user = await User.findOne({name: assignee})
-      user.tasks.push(newTask)
-      user.save()
+
+    if (assignee) {
+      const user = await User.findOne({ name: assignee });
+      user.tasks.push(newTask);
+      user.save();
     }
-   
-    const created = await Task.create(newTask)
-    sendResponse(res,200,true,{task:created},null,{message:'Create task success'})
+
+    const created = await Task.create(newTask);
+    sendResponse(res, 200, true, { task: created }, null, {
+      message: "Create task success",
+    });
   } catch (error) {
     next(error);
   }
 };
 
-//check role, check status 
+//check role, check status
 //done => check request for "archived"
-taskController.updateTask = async (req,res,next) => {
-//check role before update task
-  let {taskId} = req.params
-  let {role, status} = req.body
-  let updateInfo = req.body
-  let options = {new:true}
-  const workState = ["pending","working",'review','done','archived']
-
-  
-  try {
-  const updates = Object.keys(req.body)
-  const allowedUpdates = ['name',
-    'description',
-    'assignee',
-    'status',
-    'assignedBy','role']
-  const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
-
-  if (!isValidOperation) {
-      return res.status(400).send({ error: 'Invalid updates!' })
+taskController.updateTask = async (req, res, next) => {
+  //check role before update task
+  let { taskId } = req.params;
+  let { userId, status, assignee, name, description,  } = req.body;
+  let updateInfo = {
+    name,
+    status,
+    description,
+    assignee
   }
-
-  //check role to authorize update task
-  if(role !== 'manager') throw new AppError(403, "not allowed", "update task failed")
-  // check status from task and match with the req from body
-  const task = await Task.findById(taskId)
-  const updatedTask = await Task.findByIdAndUpdate(taskId,updateInfo, options)
-
-  switch (task.status) {
-    // case status:
-    //   // sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
-    //     break
-    case 'pending':
-      sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
-        break;
-    case 'working':
-      sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
-        break
-    case 'review':
-      sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
-        break
-    case 'done':
-      if(status !== 'archived') throw new AppError(404, "done task cannot be change", 'update task failed')
-      sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
-
-        break
-    case 'archived':
-      if(status !== 'archived') throw new AppError(404, 'cannot change archived task', 'task update failed')
-
-      sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
-        break
-    default:
-      return task
-  }
-
-  
-  
-  
-  
-  //employee can change from pending to review, cannot change back from review
-  //manager change review - done - archived
-  //task done can only change to archived
-  //task archived is permanent
-
-  //update task
-  // const updatedTask = await Task.findByIdAndUpdate(id,updateInfo, options)
-  // sendResponse(res,200,true,{updatedTask}, null,{message: 'update task success'})
-
-  
-} catch (error) {
-  next(error)
-}
-}
-
-//move to task.controller
-taskController.getTaskOfUser = async (req,res,next) => {
-
-  let {name} = req.params
-
+  let options = {upsert: true, new: true };
+  let allowedStatus = ['pending','working','review','done','archived']
   try {
-      const task = await Task.find({assignee: name})
-      if(!task)
-      sendResponse(res,200,true,{userTask: task},null,{message:"get user's task successful"})
+    const updates = Object.keys(req.body);
+    const allowedUpdates = [
+      "name",
+      "description",
+      "assignee",
+      "status",
+      "assignedBy",
+      "userId",
+    ];
+    const isValidOperation = updates.every((update) =>
+      allowedUpdates.includes(update)
+      );
+    if (!isValidOperation)throw new AppError(400, "Invalid updates!", "update unsuccess");
+    //check for correct status
+    const isValidStatus = allowedStatus.find((validStatus)=> validStatus === status)
+    if(!isValidStatus && status) throw new AppError(404, "status not allow", "no task found")
+
+    const assignPerson = await User.findById(assignee)
+    if(!assignPerson) throw new AppError(404, "assigned person not exist", "no user found")
+    
+    const task = await Task.findById(taskId);
+    //check role to authorize update task
+    //check userId if manager
+    if (!task) throw new AppError(404, "task not exist", "no task found");
+    if (
+      // task.assignee.toString() !== userId &&
+      task.assignedBy.toString() !== userId
+    )
+      throw new AppError(403, "not allowed", "update task failed");
+
+    // check status from task and match with the req from body
+    let user = await User.findById(userId);
+    if (status !==undefined) {
+      if (user.role === "manager") {
+        switch (task.status) {
+          case "done":
+          case "archived":
+            if (status !== "archived")
+              throw new AppError(
+                404,
+                "cannot change done, archived task",
+                "task update failed"
+              );
+            break;
+          default:
+            break;
+        }
+
+        const updatedTask = await Task.findByIdAndUpdate(
+          taskId,
+          updateInfo,
+          options
+        );
+
+        sendResponse(res, 200, true, { updatedTask }, null, {
+          message: "update task success",
+        });
+      } else {
+        switch (task.status) {
+          case "done":
+          case "archived":
+            throw new AppError(
+              404,
+              "cannot change archived task",
+              "task update failed"
+            );
+          default:
+            break;
+        }
+        const updatedTask = await Task.findByIdAndUpdate(
+          taskId,
+          updateInfo,
+          options
+        );
+        sendResponse(res, 200, true, { updatedTask }, null, {
+          message: "update task success",
+        });
+      }
+    }
+    
+    if(task.assignee.includes(assignee)) {
+      throw new AppError(404, "user already assign to task", "assign task failed")
+    } else if(task.assignee.length > 0) {
+      task.assignee.push(assignee)
+    }
+    
+    updateInfo.assignee = task.assignee
+
+    console.log(task.assignee.includes(assignee))
+    const updatedTask = await Task.findByIdAndUpdate(
+      taskId,
+      updateInfo,
+      options
+    );
+    sendResponse(res, 200, true, { updatedTask }, null, {
+      message: "update task success",
+    });
   } catch (error) {
-      next(error)
+    next(error);
   }
+};
 
-}
+taskController.getTaskOfUser = async (req, res, next) => {
+  let { name } = req.query
+  try {
+    const user = await User.find({ name: name.toLowerCase() });
+    const {_id} = user
+    console.log(name)
+    const task = await Task.find({ assignee: user._id, deleted: false });
+    if (!task)
+      throw new AppError(404, "task not found", "get user task failed");
+    sendResponse(res, 200, true, { userTask: task }, null, {
+      message: "get user's task successful",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-module.exports = taskController
+taskController.deleteTask = async (req, res, next) => {
+
+  try {
+    let { taskId } = req.params;
+    if (!ObjectId.isValid(taskId))
+      throw new AppError(402, "Not mongo ObjectId", "get single task failed");
+    let toBeDeleted = await Task.findById(taskId);
+    if (!toBeDeleted)
+      throw new AppError(400, "task not found", "no task in DB");
+
+    toBeDeleted.delete();
+    sendResponse(res, 200, true, { deletedTask: toBeDeleted }, null, {
+      message: "delete task success",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = taskController;

@@ -1,0 +1,55 @@
+[{
+  "_id": {
+    "$oid": "63bb12cda7cd5e0bc1908a05"
+  },
+  "name": "trietbm",
+  "tasks": [],
+  "role": "manager",
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1673204429511"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1673204524921"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "63bb12dca7cd5e0bc1908a08"
+  },
+  "name": "mcfly",
+  "tasks": [],
+  "role": "employee",
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1673204444434"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1673204444434"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "63bb12e4a7cd5e0bc1908a0b"
+  },
+  "name": "tinker",
+  "tasks": [],
+  "role": "employee",
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1673204452142"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1673204452142"
+    }
+  },
+  "__v": 0
+}]

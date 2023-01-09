@@ -1,17 +1,23 @@
-const express = require('express')
+const express = require("express");
 
-const { getAllTasks, createTask, getTaskByName, getTaskOfUser, updateTask } = require('../controllers/task.controller')
+const {
+  getAllTasks,
+  createTask,
+  getTaskOfUser,
+  updateTask,
+  deleteTask,
+  getTaskById,
+} = require("../controllers/task.controller");
 
-const router = express.Router()
-
+const router = express.Router({mergeParams: true});
 
 /**
  * @route GET api/task
  * @description get All tasks
  * @access private, manager
- * @allowQueries: task id, name, createdAt, updateAt 
+ * @allowQueries: task id, name, createdAt, updateAt
  */
-router.get('/', getAllTasks)
+router.get("/", getAllTasks);
 
 /**
  * @route POST api/task
@@ -19,32 +25,49 @@ router.get('/', getAllTasks)
  * @access private, manager
  * @requiredBody: role, name, description, status, assignedBy
  */
-router.post('/', createTask)
+router.post("/", createTask);
 
 /**
  * @route GET api/task
  * @description get single task by Id
  * @access private, manager
- * @requiredBody: role, name, description, status, assignedBy
+ * @requiredParams taskId - Mongodb ObjectId
  */
-router.get('/:taskId', getTaskByName)
+router.get("/:taskId", getTaskById);
 
 /**
  * @route GET api/task
- * @description get task of a user by name
+ * @description get task of a user by username
  * @access private, manager
  * @requiredParams: user "name"
  */
-router.get('/:name', getTaskOfUser)
+router.get("/userTask/:name", getTaskOfUser);
+
+
 
 /**
- * @route GET api/task
+ * @route PUT api/task
  * @description get single task by Id
  * @access private, manager
  * @requiredParams: taskId
+ * @requiredBody: 
+ *    "name",
+      "description",
+      "assignee",
+      "status",
+      "assignedBy",
+      "userId",
  */
-router.put('/:taskId', updateTask)
+router.put("/:taskId", updateTask);
+
+/**
+ * @route delete api/task
+ * @description soft delete task by id
+ * @access private, manager
+ * @requiredParams: taskId
+ */
+router.delete("/:taskId", deleteTask);
 
 
-module.exports = router
 
+module.exports = router;
