@@ -13,9 +13,9 @@ const router = express.Router({mergeParams: true});
 
 /**
  * @route GET api/task
- * @description get All tasks
+ * @description get All tasks, filter task by status, createdAt, updatedAt, assignee
  * @access private, manager
- * @allowQueries: task id, name, createdAt, updateAt
+ * @allowQueries: task id, assignee, createdAt, updateAt
  */
 router.get("/", getAllTasks);
 

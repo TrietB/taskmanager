@@ -90,10 +90,13 @@ taskController.getAllTasks = async (req, res, next) => {
             break;
           case 'assignee':
             const assignee = filterQuery[condition].toLowerCase()
-            console.log(assignee)
-            const user = User.find({name: assignee.toString()})
-            const filterByAssignee = listOfTasks.filter((task)=> task.assignee.includes(assignee))
-            if(!filterByAssignee) throw new AppError(404, 'Assignee not found', 'get task by username faild')
+            const user = await User.find({name: assignee}).select('_id')
+            const {_id} = user[0]
+            console.log(_id.toString())
+            if(!user) throw new AppError(404, 'Assignee not found', 'get task by username failed')
+            console.log(listOfTasks)
+            const filterByAssignee = listOfTasks.filter((task)=> task.assignee.includes(_id.toString()))
+            if(!filterByAssignee) throw new AppError(404, 'Assignee not found', 'get task by username failed')
             sendResponse(res,200,true,{tasks: filterByAssignee}, null,{message:'get all tasks success'})
           break
           default:
@@ -208,6 +211,7 @@ taskController.updateTask = async (req, res, next) => {
     const isValidStatus = allowedStatus.find((validStatus)=> validStatus === status)
     if(!isValidStatus && status) throw new AppError(404, "status not allow", "no task found")
 
+    //check for assigned user
     const assignPerson = await User.findById(assignee)
     if(!assignPerson) throw new AppError(404, "assigned person not exist", "no user found")
     
@@ -319,7 +323,7 @@ taskController.deleteTask = async (req, res, next) => {
     let toBeDeleted = await Task.findById(taskId);
     if (!toBeDeleted)
       throw new AppError(400, "task not found", "no task in DB");
-
+//soft detele using mongoose soft delete package
     toBeDeleted.delete();
     sendResponse(res, 200, true, { deletedTask: toBeDeleted }, null, {
       message: "delete task success",
