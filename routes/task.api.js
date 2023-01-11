@@ -3,13 +3,12 @@ const express = require("express");
 const {
   getAllTasks,
   createTask,
-  getTaskOfUser,
   updateTask,
   deleteTask,
   getTaskById,
 } = require("../controllers/task.controller");
 
-const router = express.Router({mergeParams: true});
+const router = express.Router();
 
 /**
  * @route GET api/task
@@ -35,19 +34,12 @@ router.post("/", createTask);
  */
 router.get("/:taskId", getTaskById);
 
-/**
- * @route GET api/task
- * @description get task of a user by username
- * @access private, manager
- * @requiredParams: user "name"
- */
-router.get("/userTask/:name", getTaskOfUser);
 
 
 
 /**
  * @route PUT api/task
- * @description get single task by Id
+ * @description update task by id, assign task to employee
  * @access private, manager
  * @requiredParams: taskId
  * @requiredBody: 

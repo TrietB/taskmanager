@@ -120,6 +120,7 @@ userController.getUser = async (req, res, next) => {
     if (!ObjectId.isValid(id))
     throw new AppError(402, "Not mongo ObjectId", "get single task failed");
     const user = await User.findById(id).populate('tasks')
+    console.log(user)
     if (!user) throw new AppError(404, "User not found", "Get user unsucess");
     sendResponse(res, 200, true, { user: user }, null, {
       message: "retrieved user",

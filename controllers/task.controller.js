@@ -96,7 +96,7 @@ taskController.getAllTasks = async (req, res, next) => {
             if(!user) throw new AppError(404, 'Assignee not found', 'get task by username failed')
             console.log(listOfTasks)
             const filterByAssignee = listOfTasks.filter((task)=> task.assignee.includes(_id.toString()))
-            if(!filterByAssignee) throw new AppError(404, 'Assignee not found', 'get task by username failed')
+            if(!filterByAssignee) throw new AppError(404, 'Assignee has no task', 'get task by username failed')
             sendResponse(res,200,true,{tasks: filterByAssignee}, null,{message:'get all tasks success'})
           break
           default:
@@ -277,13 +277,15 @@ taskController.updateTask = async (req, res, next) => {
     
     if(task.assignee.includes(assignee)) {
       throw new AppError(404, "user already assign to task", "assign task failed")
-    } else if(task.assignee.length > 0) {
+    } else if(task.assignee.length >= 0) {
       task.assignee.push(assignee)
+      assignPerson.tasks.push(task._id)
+      assignPerson.save()
     }
     
     updateInfo.assignee = task.assignee
 
-    console.log(task.assignee.includes(assignee))
+    console.log(assignPerson)
     const updatedTask = await Task.findByIdAndUpdate(
       taskId,
       updateInfo,
@@ -302,7 +304,7 @@ taskController.getTaskOfUser = async (req, res, next) => {
   try {
     const user = await User.find({ name: name.toLowerCase() });
     const {_id} = user
-    console.log(name)
+    console.log(user)
     const task = await Task.find({ assignee: user._id, deleted: false });
     if (!task)
       throw new AppError(404, "task not found", "get user task failed");
